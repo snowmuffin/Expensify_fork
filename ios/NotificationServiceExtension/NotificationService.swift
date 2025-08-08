@@ -23,10 +23,20 @@ class NotificationService: UANotificationServiceExtension {
   }
   
   override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-    os_log("[NotificationService] didReceive() - received notification", log: log)
+    // Add detailed push notification receive logs
+    os_log("=== PUSH NOTIFICATION RECEIVED ===", log: log, type: .info)
+    os_log("[NotificationService] Notification ID: %{public}@", log: log, type: .info, request.identifier)
+    os_log("[NotificationService] Title: %{public}@", log: log, type: .info, request.content.title)
+    os_log("[NotificationService] Body: %{public}@", log: log, type: .info, request.content.body)
+    os_log("[NotificationService] Category: %{public}@", log: log, type: .info, request.content.categoryIdentifier)
+    os_log("[NotificationService] Thread ID: %{public}@", log: log, type: .info, request.content.threadIdentifier)
+    os_log("[NotificationService] Badge: %{public}@", log: log, type: .info, String(describing: request.content.badge))
+    os_log("[NotificationService] User Info: %{public}@", log: log, type: .info, String(describing: request.content.userInfo))
+    os_log("[NotificationService] Timestamp: %{public}@", log: log, type: .info, String(Date().timeIntervalSince1970))
     
     self.contentHandler = contentHandler
     guard let bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent) else {
+      os_log("[NotificationService] Failed to create mutable content", log: log, type: .error)
       contentHandler(request.content)
       return
     }
@@ -34,8 +44,10 @@ class NotificationService: UANotificationServiceExtension {
     bestAttemptContent.sound = UNNotificationSound(named: UNNotificationSoundName("receive.mp3"))
     
     if #available(iOSApplicationExtension 15.0, *) {
+      os_log("[NotificationService] Configuring communication notification (iOS 15+)", log: log, type: .info)
       configureCommunicationNotification(notificationContent: bestAttemptContent, contentHandler: contentHandler)
     } else {
+      os_log("[NotificationService] Using basic notification (iOS < 15)", log: log, type: .info)
       contentHandler(bestAttemptContent)
     }
   }

@@ -103,7 +103,14 @@ public class CustomNotificationProvider extends ReactNotificationProvider {
     protected NotificationCompat.Builder onExtendBuilder(@NonNull Context context, @NonNull NotificationCompat.Builder builder, @NonNull NotificationArguments arguments) {
         super.onExtendBuilder(context, builder, arguments);
         PushMessage message = arguments.getMessage();
-        Log.d(TAG, "buildNotification: " + message.toString());
+        
+        // Add detailed push notification receive logs
+        Log.d(TAG, "=== PUSH NOTIFICATION RECEIVED ===");
+        Log.d(TAG, "Message ID: " + message.getSendId());
+        Log.d(TAG, "Alert: " + message.getExtra(PushMessage.EXTRA_ALERT));
+        Log.d(TAG, "Title: " + message.getExtra(PushMessage.EXTRA_TITLE));
+        Log.d(TAG, "Timestamp: " + System.currentTimeMillis());
+        Log.d(TAG, "Full message: " + message.toString());
 
         // Improve notification delivery by categorizing as a time-critical message
         builder.setCategory(CATEGORY_MESSAGE);
@@ -121,6 +128,7 @@ public class CustomNotificationProvider extends ReactNotificationProvider {
 
         // Attempt to parse data and apply custom notification styling
         if (!message.containsKey(PAYLOAD_KEY)) {
+            Log.d(TAG, "No payload found in message, using default notification style");
             return builder;
         }
 
@@ -131,16 +139,17 @@ public class CustomNotificationProvider extends ReactNotificationProvider {
               return builder;
             }
 
+            Log.d(TAG, "Processing payload of length: " + rawPayload.length());
             PayloadHandler handler = new PayloadHandler();
             String processedPayload = handler.processPayload(rawPayload);
             JsonMap payload = JsonValue.parseString(processedPayload).optMap();
+            
             if (!payload.containsKey(ONYX_DATA_KEY)) {
                 Log.d(TAG, "Failed to process payload - no onyx data. SendID=" + message.getSendId());
                 return builder;
             }
 
-            Objects.requireNonNull(payload.get(ONYX_DATA_KEY)).isNull();
-            Log.d(TAG, "payload contains onxyData");
+            Log.d(TAG, "Payload contains onyxData, applying message style");
             String alert = message.getExtra(PushMessage.EXTRA_ALERT);
             applyMessageStyle(context, builder, payload, arguments.getNotificationId(), alert);
         } catch (Exception e) {
