@@ -1,5 +1,4 @@
 import Airship, {iOS} from '@ua/react-native-airship';
-import shouldShowPushNotification from '@libs/Notification/PushNotification/shouldShowPushNotification';
 import type ForegroundNotificationsModule from './types';
 
 function configureForegroundNotifications() {
@@ -14,7 +13,8 @@ function configureForegroundNotifications() {
 
     // Set a callback to override our foreground presentation per notification depending on the app's current state.
     // Returning null keeps the default presentation. Returning [] uses no presentation (hides the notification).
-    Airship.push.iOS.setForegroundPresentationOptionsCallback((pushPayload) => Promise.resolve(shouldShowPushNotification(pushPayload) ? null : []));
+    // Always show push notifications in foreground
+    Airship.push.iOS.setForegroundPresentationOptionsCallback(() => Promise.resolve(null));
 }
 
 function disableForegroundNotifications() {

@@ -1,12 +1,18 @@
 import Airship from '@ua/react-native-airship';
-import shouldShowPushNotification from '@libs/Notification/PushNotification/shouldShowPushNotification';
+import Log from '@libs/Log';
 import type ForegroundNotificationsModule from './types';
 
 function configureForegroundNotifications() {
-    Airship.push.android.setForegroundDisplayPredicate((pushPayload) => Promise.resolve(shouldShowPushNotification(pushPayload)));
+    Log.info('[PushNotification] Configuring Android foreground notifications to always show');
+    // Always show push notifications in foreground
+    Airship.push.android.setForegroundDisplayPredicate((pushPayload) => {
+        Log.info('[PushNotification] Android foreground display predicate called', false, {pushPayload});
+        return Promise.resolve(true);
+    });
 }
 
 function disableForegroundNotifications() {
+    Log.info('[PushNotification] Disabling Android foreground notifications');
     Airship.push.android.setForegroundDisplayPredicate(() => Promise.resolve(false));
 }
 
