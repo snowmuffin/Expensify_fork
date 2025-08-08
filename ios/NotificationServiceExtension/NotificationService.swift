@@ -23,16 +23,18 @@ class NotificationService: UANotificationServiceExtension {
   }
   
   override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-    // Add detailed push notification receive logs
-    os_log("=== PUSH NOTIFICATION RECEIVED ===", log: log, type: .info)
-    os_log("[NotificationService] Notification ID: %{public}@", log: log, type: .info, request.identifier)
-    os_log("[NotificationService] Title: %{public}@", log: log, type: .info, request.content.title)
-    os_log("[NotificationService] Body: %{public}@", log: log, type: .info, request.content.body)
-    os_log("[NotificationService] Category: %{public}@", log: log, type: .info, request.content.categoryIdentifier)
-    os_log("[NotificationService] Thread ID: %{public}@", log: log, type: .info, request.content.threadIdentifier)
-    os_log("[NotificationService] Badge: %{public}@", log: log, type: .info, String(describing: request.content.badge))
-    os_log("[NotificationService] User Info: %{public}@", log: log, type: .info, String(describing: request.content.userInfo))
-    os_log("[NotificationService] Timestamp: %{public}@", log: log, type: .info, String(Date().timeIntervalSince1970))
+    // CRITICAL: Log initial push notification receipt before any processing
+    os_log("====== INITIAL PUSH NOTIFICATION RECEIVED ======", log: log, type: .info)
+    os_log("[RECEIVE] Push notification arrived at NotificationService", log: log, type: .info)
+    os_log("[RECEIVE] Notification ID: %{public}@", log: log, type: .info, request.identifier)
+    os_log("[RECEIVE] Title: %{public}@", log: log, type: .info, request.content.title)
+    os_log("[RECEIVE] Body: %{public}@", log: log, type: .info, request.content.body)
+    os_log("[RECEIVE] Category: %{public}@", log: log, type: .info, request.content.categoryIdentifier)
+    os_log("[RECEIVE] Thread ID: %{public}@", log: log, type: .info, request.content.threadIdentifier)
+    os_log("[RECEIVE] Badge: %{public}@", log: log, type: .info, String(describing: request.content.badge))
+    os_log("[RECEIVE] Timestamp: %{public}@", log: log, type: .info, String(Date().timeIntervalSince1970))
+    os_log("[RECEIVE] User Info Keys: %{public}@", log: log, type: .info, request.content.userInfo.keys.description)
+    os_log("=================================================", log: log, type: .info)
     
     self.contentHandler = contentHandler
     guard let bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent) else {

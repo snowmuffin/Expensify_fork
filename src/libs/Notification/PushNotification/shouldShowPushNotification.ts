@@ -8,19 +8,23 @@ import parsePushNotificationPayload from './parsePushNotificationPayload';
  * Returns whether the given Airship notification should be shown depending on the current state of the app
  */
 export default function shouldShowPushNotification(pushPayload: PushPayload): boolean {
-    // Top priority logging - check if this function is called
-    console.log('[PushNotification] shouldShowPushNotification CALLED!', {
-        notificationId: pushPayload?.notificationId,
-        timestamp: new Date().toISOString(),
-    });
+    // CRITICAL: Log before any filtering or processing
+    console.log('====== PUSH NOTIFICATION FILTER ENTRY ======');
+    console.log('[FILTER] Evaluating whether to show push notification');
+    console.log('[FILTER] Notification ID:', pushPayload?.notificationId);
+    console.log('[FILTER] Alert:', pushPayload?.alert);
+    console.log('[FILTER] Title:', pushPayload?.title);
+    console.log('[FILTER] Subtitle:', pushPayload?.subtitle);
+    console.log('[FILTER] Timestamp:', new Date().toISOString());
+    console.log('=============================================');
 
-    // Add detailed push notification receive logs
-    Log.info('[PushNotification] Push notification received - evaluating display', false, {
-        notificationId: pushPayload.notificationId,
-        alert: pushPayload.alert,
-        title: pushPayload.title,
-        subtitle: pushPayload.subtitle,
-        extras: pushPayload.extras,
+    Log.info('[FILTER] Push notification filtering started', false, {
+        notificationId: pushPayload?.notificationId,
+        alert: pushPayload?.alert,
+        title: pushPayload?.title,
+        subtitle: pushPayload?.subtitle,
+        hasExtras: !!(pushPayload?.extras),
+        hasPayload: !!(pushPayload?.extras?.payload),
         timestamp: new Date().toISOString(),
     });
     

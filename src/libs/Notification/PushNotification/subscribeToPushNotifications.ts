@@ -102,13 +102,25 @@ Onyx.connect({
 });
 
 function applyOnyxData({reportID, onyxData, lastUpdateID, previousUpdateID, hasPendingOnyxUpdates = false}: PushNotificationData): Promise<void> {
-    // Add push notification Onyx data application logs
-    Log.info(`[PushNotification] Starting to apply onyx data - ${Visibility.isVisible() ? 'FOREGROUND' : 'BACKGROUND'}`, false, {
+    // CRITICAL: Log notification received at subscription level
+    console.log('====== PUSH NOTIFICATION SUBSCRIPTION CALLBACK ======');
+    console.log('[SUBSCRIPTION] Push notification received in subscription callback');
+    console.log('[SUBSCRIPTION] Report ID:', reportID);
+    console.log('[SUBSCRIPTION] Last Update ID:', lastUpdateID);
+    console.log('[SUBSCRIPTION] Previous Update ID:', previousUpdateID);
+    console.log('[SUBSCRIPTION] Onyx data count:', onyxData?.length ?? 0);
+    console.log('[SUBSCRIPTION] Has pending updates:', hasPendingOnyxUpdates);
+    console.log('[SUBSCRIPTION] App visibility:', Visibility.isVisible() ? 'FOREGROUND' : 'BACKGROUND');
+    console.log('[SUBSCRIPTION] Timestamp:', new Date().toISOString());
+    console.log('======================================================');
+
+    Log.info(`[SUBSCRIPTION] Push notification received in subscription callback - ${Visibility.isVisible() ? 'FOREGROUND' : 'BACKGROUND'}`, false, {
         reportID, 
         lastUpdateID, 
         previousUpdateID,
         onyxDataCount: onyxData?.length ?? 0,
         hasPendingOnyxUpdates,
+        appVisibility: Visibility.isVisible() ? 'FOREGROUND' : 'BACKGROUND',
         timestamp: new Date().toISOString(),
     });
 

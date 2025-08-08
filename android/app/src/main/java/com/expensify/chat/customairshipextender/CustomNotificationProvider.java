@@ -104,13 +104,17 @@ public class CustomNotificationProvider extends ReactNotificationProvider {
         super.onExtendBuilder(context, builder, arguments);
         PushMessage message = arguments.getMessage();
         
-        // Add detailed push notification receive logs
-        Log.d(TAG, "=== PUSH NOTIFICATION RECEIVED ===");
-        Log.d(TAG, "Message ID: " + message.getSendId());
-        Log.d(TAG, "Alert: " + message.getExtra(PushMessage.EXTRA_ALERT));
-        Log.d(TAG, "Title: " + message.getExtra(PushMessage.EXTRA_TITLE));
-        Log.d(TAG, "Timestamp: " + System.currentTimeMillis());
-        Log.d(TAG, "Full message: " + message.toString());
+        // CRITICAL: Log initial push notification receipt before any processing
+        Log.i(TAG, "====== INITIAL PUSH NOTIFICATION RECEIVED ======");
+        Log.i(TAG, "[RECEIVE] Push notification arrived at CustomNotificationProvider");
+        Log.i(TAG, "[RECEIVE] Message ID: " + message.getSendId());
+        Log.i(TAG, "[RECEIVE] Alert: " + message.getExtra(PushMessage.EXTRA_ALERT));
+        Log.i(TAG, "[RECEIVE] Title: " + message.getExtra(PushMessage.EXTRA_TITLE));
+        Log.i(TAG, "[RECEIVE] Subtitle: " + message.getExtra(PushMessage.EXTRA_SUBTITLE));
+        Log.i(TAG, "[RECEIVE] Timestamp: " + System.currentTimeMillis());
+        Log.i(TAG, "[RECEIVE] Thread: " + Thread.currentThread().getName());
+        Log.i(TAG, "[RECEIVE] Full message extras count: " + message.getExtras().size());
+        Log.i(TAG, "=================================================");
 
         // Improve notification delivery by categorizing as a time-critical message
         builder.setCategory(CATEGORY_MESSAGE);

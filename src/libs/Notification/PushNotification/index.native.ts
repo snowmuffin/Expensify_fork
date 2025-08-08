@@ -22,16 +22,25 @@ const notificationEventActionMap: NotificationEventActionMap = {};
  * Handle a push notification event, and trigger and bound actions.
  */
 function pushNotificationEventCallback(eventType: EventType, notification: PushPayload) {
-    // Top priority log - check if this function is called
-    console.log('[PushNotification] pushNotificationEventCallback CALLED!', {
-        eventType,
-        notificationId: notification?.notificationId,
-        timestamp: new Date().toISOString(),
-    });
+    // CRITICAL: Log initial push notification receipt before any processing
+    console.log('====== INITIAL PUSH NOTIFICATION RECEIVED ======');
+    console.log('[RECEIVE] Push notification arrived at React Native layer');
+    console.log('[RECEIVE] Event Type:', eventType);
+    console.log('[RECEIVE] Notification ID:', notification?.notificationId);
+    console.log('[RECEIVE] Alert:', notification?.alert);
+    console.log('[RECEIVE] Title:', notification?.title);
+    console.log('[RECEIVE] Subtitle:', notification?.subtitle);
+    console.log('[RECEIVE] Timestamp:', new Date().toISOString());
+    console.log('[RECEIVE] Extras keys:', Object.keys(notification?.extras || {}));
+    console.log('=================================================');
     
-    Log.info('[PushNotification] pushNotificationEventCallback ENTRY', false, {
+    Log.info('[RECEIVE] Push notification received at React Native layer', false, {
         eventType,
         notificationId: notification?.notificationId,
+        alert: notification?.alert,
+        title: notification?.title,
+        subtitle: notification?.subtitle,
+        extrasKeys: Object.keys(notification?.extras || {}),
         timestamp: new Date().toISOString(),
     });
 
@@ -132,11 +141,24 @@ const init: Init = () => {
     });
 
     Airship.addListener(EventType.PushReceived, (notification) => {
-        console.log('[PushNotification] *** RAW PushReceived event triggered! ***', notification);
-        Log.info('[PushNotification] PushReceived listener triggered!', false, {
+        // CRITICAL: Log at Airship SDK level - earliest entry point
+        console.log('====== AIRSHIP SDK PUSH RECEIVED ======');
+        console.log('[AIRSHIP] PushReceived event triggered at Airship SDK level');
+        console.log('[AIRSHIP] Notification ID:', notification?.pushPayload?.notificationId);
+        console.log('[AIRSHIP] Alert:', notification?.pushPayload?.alert);
+        console.log('[AIRSHIP] Title:', notification?.pushPayload?.title);
+        console.log('[AIRSHIP] Subtitle:', notification?.pushPayload?.subtitle);
+        console.log('[AIRSHIP] Has extras:', !!(notification?.pushPayload?.extras));
+        console.log('[AIRSHIP] Timestamp:', new Date().toISOString());
+        console.log('=======================================');
+        
+        Log.info('[AIRSHIP] PushReceived listener triggered at Airship SDK level', false, {
             notificationId: notification?.pushPayload?.notificationId,
+            alert: notification?.pushPayload?.alert,
+            title: notification?.pushPayload?.title,
+            subtitle: notification?.pushPayload?.subtitle,
+            hasExtras: !!(notification?.pushPayload?.extras),
             hasPayload: !!notification?.pushPayload,
-            notification: notification,
             timestamp: new Date().toISOString(),
         });
         return pushNotificationEventCallback(EventType.PushReceived, notification.pushPayload);
@@ -145,11 +167,20 @@ const init: Init = () => {
     // Note: the NotificationResponse event has a nested PushReceived event,
     // so event.notification refers to the same thing as notification above ^
     Airship.addListener(EventType.NotificationResponse, (event) => {
-        console.log('[PushNotification] *** RAW NotificationResponse event triggered! ***', event);
-        Log.info('[PushNotification] NotificationResponse listener triggered!', false, {
+        // CRITICAL: Log notification response (user tap)
+        console.log('====== AIRSHIP SDK NOTIFICATION RESPONSE ======');
+        console.log('[AIRSHIP] NotificationResponse event triggered (user tapped notification)');
+        console.log('[AIRSHIP] Notification ID:', event?.pushPayload?.notificationId);
+        console.log('[AIRSHIP] Alert:', event?.pushPayload?.alert);
+        console.log('[AIRSHIP] Title:', event?.pushPayload?.title);
+        console.log('[AIRSHIP] Timestamp:', new Date().toISOString());
+        console.log('===============================================');
+        
+        Log.info('[AIRSHIP] NotificationResponse listener triggered (user tapped)', false, {
             notificationId: event?.pushPayload?.notificationId,
+            alert: event?.pushPayload?.alert,
+            title: event?.pushPayload?.title,
             hasPayload: !!event?.pushPayload,
-            event: event,
             timestamp: new Date().toISOString(),
         });
         return pushNotificationEventCallback(EventType.NotificationResponse, event.pushPayload);

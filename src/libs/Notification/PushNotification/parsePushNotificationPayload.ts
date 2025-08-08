@@ -9,7 +9,15 @@ const GZIP_MAGIC_NUMBER = '\x1f\x8b';
  * Parse the payload of a push notification. On Android, some notification payloads are sent as a JSON string rather than an object
  */
 export default function parsePushNotificationPayload(payload: JsonValue | undefined): PushNotificationData | undefined {
-    Log.info('[PushNotification] Starting payload parsing', false, {
+    // CRITICAL: Log payload parsing entry
+    console.log('====== PUSH NOTIFICATION PAYLOAD PARSING ======');
+    console.log('[PAYLOAD] Starting payload parsing');
+    console.log('[PAYLOAD] Has payload:', payload !== undefined);
+    console.log('[PAYLOAD] Payload type:', typeof payload);
+    console.log('[PAYLOAD] Timestamp:', new Date().toISOString());
+    console.log('===============================================');
+
+    Log.info('[PAYLOAD] Push notification payload parsing started', false, {
         hasPayload: payload !== undefined,
         payloadType: typeof payload,
         timestamp: new Date().toISOString(),
