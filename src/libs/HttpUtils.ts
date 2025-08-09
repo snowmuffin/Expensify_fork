@@ -54,6 +54,16 @@ const APICommandRegex = /\/api\/([^&?]+)\??.*/;
  */
 function processHTTPRequest(url: string, method: RequestType = 'get', body: FormData | null = null, abortSignal: AbortSignal | undefined = undefined): Promise<Response> {
     const startTime = new Date().valueOf();
+    
+    // Log HTTP request start
+    console.log('[HTTP] 🌐 Starting HTTP request:', {
+        url,
+        method,
+        hasBody: !!body,
+        hasAbortSignal: !!abortSignal,
+        startTime: new Date(startTime).toISOString(),
+    });
+
     return fetch(url, {
         // We hook requests to the same Controller signal, so we can cancel them all at once
         signal: abortSignal,
@@ -66,15 +76,35 @@ function processHTTPRequest(url: string, method: RequestType = 'get', body: Form
         credentials: 'omit',
     })
         .then((response) => {
+            const endTime = new Date().valueOf();
+            const duration = endTime - startTime;
+            
+            // Log HTTP response received
+            console.log('[HTTP] 📨 Received response:', {
+                url,
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok,
+                duration: `${duration}ms`,
+                headers: Object.fromEntries(response.headers.entries()),
+                timestamp: new Date(endTime).toISOString(),
+            });
+
             // We are calculating the skew to minimize the delay when posting the messages
             const match = url.match(APICommandRegex)?.[1];
             if (match && addSkewList.includes(match) && response.headers) {
                 const dateHeaderValue = response.headers.get('Date');
                 const serverTime = dateHeaderValue ? new Date(dateHeaderValue).valueOf() : new Date().valueOf();
-                const endTime = new Date().valueOf();
-                const latency = (endTime - startTime) / 2;
+                const latency = duration / 2;
                 const skew = serverTime - startTime + latency;
                 setTimeSkew(dateHeaderValue ? skew : 0);
+                
+                console.log('[HTTP] ⏱️ Time skew calculated:', {
+                    command: match,
+                    serverTime: new Date(serverTime).toISOString(),
+                    latency: `${latency}ms`,
+                    skew: `${skew}ms`,
+                });
             }
             return response;
         })
@@ -118,6 +148,19 @@ function processHTTPRequest(url: string, method: RequestType = 'get', body: Form
             return response.json() as Promise<Response>;
         })
         .then((response) => {
+            // Log JSON response parsing completed
+            console.log('[HTTP] 📋 Response parsed:', {
+                url,
+                jsonCode: response.jsonCode,
+                message: response.message,
+                title: response.title,
+                hasData: !!response.data,
+                // shouldShowPushNotification is not defined in Response type but may exist in practice
+                hasShouldShowPushNotification: (response as any).shouldShowPushNotification !== undefined,
+                shouldShowPushNotification: (response as any).shouldShowPushNotification,
+                responseKeys: Object.keys(response),
+                timestamp: new Date().toISOString(),
+            });
             // Some retried requests will result in a "Unique Constraints Violation" error from the server, which just means the record already exists
             if (response.jsonCode === CONST.JSON_CODE.BAD_REQUEST && response.message === CONST.ERROR_TITLE.DUPLICATE_RECORD) {
                 throw new HttpsError({
@@ -162,6 +205,32 @@ function xhr(command: string, data: Record<string, unknown>, type: RequestType =
     return prepareRequestPayload(command, data, initiatedOffline).then((formData) => {
         const url = getCommandURL({shouldUseSecure, command});
         const abortSignalController = data.canCancel ? (abortControllerMap.get(command as AbortCommand) ?? abortControllerMap.get(ABORT_COMMANDS.All)) : undefined;
+
+        // Log HTTP request sending
+        console.log('[HTTP] 🚀 Sending request:', {
+            command,
+            url,
+            method: type,
+            dataKeys: Object.keys(data),
+            shouldUseSecure,
+            initiatedOffline,
+            hasAbortController: !!abortSignalController,
+            timestamp: new Date().toISOString(),
+        });
+
+        // Log FormData contents when possible
+        if (formData) {
+            const formDataEntries: Record<string, unknown> = {};
+            try {
+                // Extract all key-value pairs from FormData
+                for (const [key, value] of formData.entries()) {
+                    formDataEntries[key] = typeof value === 'string' ? value : `[${typeof value}]`;
+                }
+                console.log('[HTTP] 📦 Request payload:', formDataEntries);
+            } catch (error) {
+                console.log('[HTTP] ⚠️ Could not log FormData entries:', error);
+            }
+        }
 
         return processHTTPRequest(url, type, formData, abortSignalController?.signal);
     });

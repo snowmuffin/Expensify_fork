@@ -94,6 +94,17 @@ function prepareRequest<TCommand extends ApiCommand>(
         pusherSocketID: isWriteRequest ? pusherSocketID : undefined,
     };
 
+    // Log full request data preparation
+    Log.info('[API] Full request data prepared', false, {
+        command,
+        type,
+        requestData: data,
+        hasOptimisticData: !!optimisticData,
+        hasSuccessData: !!onyxData.successData,
+        hasFailureData: !!onyxData.failureData,
+        pusherSocketID: data.pusherSocketID,
+    });
+
     // Assemble all request metadata (used by middlewares, and for persisted requests stored in Onyx)
     const request: SetRequired<OnyxRequest, 'data'> = {
         command,
