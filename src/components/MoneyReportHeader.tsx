@@ -1179,7 +1179,7 @@ function MoneyReportHeader({
                     }
                     // Send a message using existing adminCanceledRequest translation key
                     const amount = moneyRequestReport?.total ? CurrencyUtils.convertToDisplayString(moneyRequestReport.total, moneyRequestReport.currency) : '';
-                    cancelPayment(moneyRequestReport, chatReport, translate('iou.adminCanceledRequest', {manager: '', amount}));
+                    cancelPayment(moneyRequestReport, chatReport);
                     setIsCancelPaymentModalVisible(false);
                 }}
                 onCancel={() => setIsCancelPaymentModalVisible(false)}
