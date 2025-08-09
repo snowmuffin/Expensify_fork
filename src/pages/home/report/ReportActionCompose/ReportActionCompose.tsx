@@ -332,6 +332,14 @@ function ReportActionCompose({
                     // Handle single file
                     addAttachmentReportActions(reportID, attachmentFileRef.current, newCommentTrimmed, true);
                 }
+                // If there's comment text with the attachment, also send it as a separate chat message
+                if (newCommentTrimmed) {
+                    // Send the comment text as a separate chat message
+                    Performance.markStart(CONST.TIMING.SEND_MESSAGE, {message: newCommentTrimmed});
+                    Timing.start(CONST.TIMING.SEND_MESSAGE);
+                    onSubmit(newCommentTrimmed);
+                }
+                
                 attachmentFileRef.current = null;
             } else {
                 Performance.markStart(CONST.TIMING.SEND_MESSAGE, {message: newCommentTrimmed});

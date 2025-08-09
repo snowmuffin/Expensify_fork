@@ -20,6 +20,7 @@ import {setupMergeTransactionData} from '@libs/actions/MergeTransaction';
 import {turnOffMobileSelectionMode} from '@libs/actions/MobileSelectionMode';
 import {deleteAppReport, downloadReportPDF, exportReportToCSV, exportReportToPDF, exportToIntegration, markAsManuallyExported, openReport, openUnreportedExpense} from '@libs/actions/Report';
 import {queueExportSearchWithTemplate} from '@libs/actions/Search';
+import * as CurrencyUtils from '@libs/CurrencyUtils';
 import getNonEmptyStringOnyxID from '@libs/getNonEmptyStringOnyxID';
 import getPlatform from '@libs/getPlatform';
 import {getThreadReportIDsForTransactions, getTotalAmountForIOUReportPreviewButton} from '@libs/MoneyRequestReportUtils';
@@ -1176,7 +1177,9 @@ function MoneyReportHeader({
                     if (!chatReport) {
                         return;
                     }
-                    cancelPayment(moneyRequestReport, chatReport);
+                    // Send a message using existing adminCanceledRequest translation key
+                    const amount = moneyRequestReport?.total ? CurrencyUtils.convertToDisplayString(moneyRequestReport.total, moneyRequestReport.currency) : '';
+                    cancelPayment(moneyRequestReport, chatReport, translate('iou.adminCanceledRequest', {manager: '', amount}));
                     setIsCancelPaymentModalVisible(false);
                 }}
                 onCancel={() => setIsCancelPaymentModalVisible(false)}
